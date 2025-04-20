@@ -23,7 +23,7 @@ memo_text = (
     "・小さじ1 = 約5ml\n"
     "・1カップ = 約200ml\n"
     "・固体の大さじ1 = 9g\n"
-    "version:1.0.4"
+    "version:1.0.5"
 )
 
 # -------------------- モデル定義 --------------------
@@ -151,20 +151,25 @@ def edit_recipe(id):
     links = RecipeIngredient.query.filter_by(recipe_id=recipe.id).all()
     return render_template('edit_recipe.html', name=recipe.name, data=recipe, ingredients=ingredients, ingredients_dict={i.id: i for i in ingredients}, links=links)
 
-@app.route('/update_recipe/<int:id>', methods=['POST'])
-def update_recipe_post(id):
-    recipe = Recipe.query.get_or_404(id)
-    recipe.servings = int(request.form['servings'])
-    recipe.memo = request.form.get('memo', '')  # ← 更新対応
+@app.route('/update_recipe/<name>', methods=['POST'])
+def update_recipe(name):
+    recipe = Recipe.query.filter_by(name=name).first_or_404()
+    recipe.servings = request.form.get('servings')
+    recipe.memo = request.form.get('memo')
+
+    # 食材の更新処理（必要に応じて前のリンク削除＋再追加）
     RecipeIngredient.query.filter_by(recipe_id=recipe.id).delete()
-    
-    ing_ids = request.form.getlist('ing_id')
-    ing_amounts = request.form.getlist('ing_amount')
-    for ing_id, amount in zip(ing_ids, ing_amounts):
-        db.session.add(RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount)))
-    
+    ingredient_ids = request.form.getlist('ing_id')
+    amounts = request.form.getlist('ing_amount')
+
+    for ing_id, amount in zip(ingredient_ids, amounts):
+        link = RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount))
+        db.session.add(link)
+
     db.session.commit()
-    return redirect(url_for('index'))
+    flash("更新しました")
+    return redirect('/')
+
 
 
 @app.route('/delete_recipe', methods=['POST'])
