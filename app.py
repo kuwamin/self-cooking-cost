@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 import os
 import pykakasi
 from flask import flash, get_flashed_messages
+from flask import redirect, url_for
+
 
 load_dotenv()
 
@@ -23,7 +25,7 @@ memo_text = (
     "・小さじ1 = 約5ml\n"
     "・1カップ = 約200ml\n"
     "・固体の大さじ1 = 9g\n"
-    "version:1.0.5"
+    "version:1.0.6"
 )
 
 # -------------------- モデル定義 --------------------
@@ -172,7 +174,8 @@ def update_recipe(id):
 
     db.session.commit()
     flash("更新しました")
-    return redirect('/')
+    return redirect(url_for('index'))
+
 
 
 
