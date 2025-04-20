@@ -1,0 +1,52 @@
+{
+  "卵": {
+    "price": 374.0,
+    "quantity": 10.0,
+    "unit": "個"
+  },
+  "白ご飯": {
+    "price": 4957.0,
+    "quantity": 10000.0,
+    "unit": "g"
+  },
+  "めんつゆ": {
+    "price": 247.0,
+    "quantity": 500.0,
+    "unit": "ml"
+  },
+  "レタス": {
+    "price": 172.0,
+    "quantity": 1.0,
+    "unit": "個"
+  },
+  "にんじん": {
+    "price": 117.0,
+    "quantity": 1.0,
+    "unit": "本"
+  },
+  "ケチャップ": {
+    "price": 247.0,
+    "quantity": 100.0,
+    "unit": "ml"
+  },
+  "マヨネーズ": {
+    "price": 322.0,
+    "quantity": 200.0,
+    "unit": "ml"
+  },
+  "えび": {
+    "price": 430.0,
+    "quantity": 180.0,
+    "unit": "g"
+  },
+  "しょうゆ": {
+    "price": 409.0,
+    "quantity": 620.0,
+    "unit": "ml"
+  },
+  "テスト": {
+    "price": 2000.0,
+    "quantity": 100.0,
+    "unit": "g"
+  }
+}

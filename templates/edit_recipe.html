@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>料理編集</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            background-color: #f7f7f7;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            max-width: 700px;
+            margin: auto;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            box-sizing: border-box;
+        }
+        table {
+            width: 100%;
+            margin-top: 10px;
+            border-collapse: collapse;
+        }
+        table td {
+            padding: 5px;
+            vertical-align: middle;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .danger {
+            background-color: #e74c3c;
+        }
+        .danger:hover {
+            background-color: #c0392b;
+        }
+        a {
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+        }
+        .unit-label {
+            padding-left: 10px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h2>「{{ name }}」の編集</h2>
+    <form method="POST" action="/update_recipe/{{ name }}">
+        <label for="servings">食数:</label>
+        <input type="number" name="servings" value="{{ data.servings }}" required>
+
+        <h3>材料:</h3>
+        <table id="ingredients_table">
+            <tr><th>食材名</th><th>使用量</th><th>単位</th><th></th></tr>
+            {% for ing_name, amount in data.ingredients %}
+            <tr>
+                <td>
+                    <select name="ing_name" onchange="updateUnit(this)">
+                        {% for opt in ingredients %}
+                            <option value="{{ opt }}" {% if opt == ing_name %}selected{% endif %}>{{ opt }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td><input type="number" step="0.01" name="ing_amount" value="{{ amount }}" required></td>
+                <td class="unit-label">{{ ingredients_db[ing_name].unit if ingredients_db[ing_name] is defined else '' }}</td>
+                <td><button type="button" onclick="this.closest('tr').remove()">削除</button></td>
+            </tr>
+            {% endfor %}
+        </table>
+        <button type="button" onclick="addIngredientRow()">材料を追加</button><br><br>
+
+        <button type="submit">更新</button>
+    </form>
+    <form method="POST" action="/delete_recipe" onsubmit="return confirm('本当に削除しますか？')">
+        <input type="hidden" name="name" value="{{ name }}">
+        <button type="submit" class="danger">この料理を削除</button>
+    </form>
+    <a href="/">トップページに戻る</a>
+
+    <script>
+        const ingredientUnits = {
+            {% for name, info in ingredients_db.items() %}
+                "{{ name }}": "{{ info.unit }}",
+            {% endfor %}
+        };
+
+        function updateUnit(selectEl) {
+            const unit = ingredientUnits[selectEl.value] || "";
+            const unitTd = selectEl.parentElement.nextElementSibling.nextElementSibling;
+            unitTd.textContent = unit;
+        }
+
+        function addIngredientRow() {
+            const table = document.getElementById("ingredients_table");
+            const row = table.insertRow();
+            const allOptions = `
+                {% for opt in ingredients %}
+                    <option value="{{ opt }}">{{ opt }}</option>
+                {% endfor %}
+            `;
+            row.innerHTML = `
+                <td>
+                    <select name="ing_name" onchange="updateUnit(this)">
+                        ${allOptions}
+                    </select>
+                </td>
+                <td><input type="number" step="0.01" name="ing_amount" required></td>
+                <td class="unit-label"></td>
+                <td><button type="button" onclick="this.closest('tr').remove()">削除</button></td>
+            `;
+        }
+    </script>
+</body>
+</html>
