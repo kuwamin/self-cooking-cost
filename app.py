@@ -163,12 +163,17 @@ def update_recipe(id):
     amounts = request.form.getlist('ing_amount')
 
     for ing_id, amount in zip(ingredient_ids, amounts):
-        link = RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount))
+        link = RecipeIngredient(
+            recipe_id=recipe.id,
+            ingredient_id=int(ing_id),
+            amount=float(amount)
+        )
         db.session.add(link)
 
     db.session.commit()
     flash("更新しました")
     return redirect('/')
+
 
 
 
