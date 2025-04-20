@@ -23,7 +23,7 @@ memo_text = (
     "・小さじ1 = 約5ml\n"
     "・1カップ = 約200ml\n"
     "・固体の大さじ1 = 9g\n"
-    "version:1.0.3"
+    "version:1.0.4"
 )
 
 # -------------------- モデル定義 --------------------
@@ -38,6 +38,8 @@ class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), unique=True, nullable=False)
     servings = db.Column(db.Integer, nullable=False)
+    memo = db.Column(db.Text)  
+
 
 class RecipeIngredient(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -125,19 +127,20 @@ def delete_ingredient():
 def add_recipe():
     name = request.form['recipe_name']
     servings = int(request.form['servings'])
-    recipe = Recipe(name=name, servings=servings)
-    db.session.add(recipe)
-    db.session.flush()  # ID取得のためコミット前にflush
+    memo = request.form.get('memo', '')  # ← メモ欄を取得
 
-    ing_ids = request.form.getlist('ing_id')  # ← 正しいキー名に修正！
+    recipe = Recipe(name=name, servings=servings, memo=memo)
+    db.session.add(recipe)
+    db.session.flush()
+    
+    ing_ids = request.form.getlist('ing_id')
     ing_amounts = request.form.getlist('ing_amount')
     for ing_id, amount in zip(ing_ids, ing_amounts):
-        if ing_id and amount:
-            link = RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount))
-            db.session.add(link)
+        db.session.add(RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount)))
 
     db.session.commit()
     return redirect(url_for('index'))
+
 
 
 # -------------------- 料理編集 --------------------
@@ -148,17 +151,21 @@ def edit_recipe(id):
     links = RecipeIngredient.query.filter_by(recipe_id=recipe.id).all()
     return render_template('edit_recipe.html', name=recipe.name, data=recipe, ingredients=ingredients, ingredients_dict={i.id: i for i in ingredients}, links=links)
 
-@app.route('/update_recipe/<name>', methods=['POST'])
-def update_recipe_post(name):
-    recipe = Recipe.query.filter_by(name=name).first_or_404()
+@app.route('/update_recipe/<int:id>', methods=['POST'])
+def update_recipe_post(id):
+    recipe = Recipe.query.get_or_404(id)
     recipe.servings = int(request.form['servings'])
+    recipe.memo = request.form.get('memo', '')  # ← 更新対応
     RecipeIngredient.query.filter_by(recipe_id=recipe.id).delete()
+    
     ing_ids = request.form.getlist('ing_id')
     ing_amounts = request.form.getlist('ing_amount')
     for ing_id, amount in zip(ing_ids, ing_amounts):
         db.session.add(RecipeIngredient(recipe_id=recipe.id, ingredient_id=int(ing_id), amount=float(amount)))
+    
     db.session.commit()
     return redirect(url_for('index'))
+
 
 @app.route('/delete_recipe', methods=['POST'])
 def delete_recipe():

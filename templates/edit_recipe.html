@@ -92,6 +92,9 @@
             {% endfor %}
         </table>
         <button type="button" onclick="addIngredientRow()">材料を追加</button><br><br>
+        <label for="memo">メモ:</label>
+    <textarea name="memo" rows="3">{{ data.memo }}</textarea>
+
         <button type="submit">更新</button>
     </form>
 
