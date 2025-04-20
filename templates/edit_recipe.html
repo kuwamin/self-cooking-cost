@@ -67,7 +67,7 @@
 </head>
 <body>
     <h2>「{{ name }}」の編集</h2>
-    <form method="POST" action="/update_recipe/{{ name }}">
+    <form method="POST" action="/update_recipe/{{ data.id }}">
         <label for="servings">食数:</label>
         <input type="number" name="servings" value="{{ data.servings }}" required>
 

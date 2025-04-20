@@ -151,13 +151,13 @@ def edit_recipe(id):
     links = RecipeIngredient.query.filter_by(recipe_id=recipe.id).all()
     return render_template('edit_recipe.html', name=recipe.name, data=recipe, ingredients=ingredients, ingredients_dict={i.id: i for i in ingredients}, links=links)
 
-@app.route('/update_recipe/<name>', methods=['POST'])
-def update_recipe(name):
-    recipe = Recipe.query.filter_by(name=name).first_or_404()
+@app.route('/update_recipe/<int:id>', methods=['POST'])
+def update_recipe(id):
+    recipe = Recipe.query.get_or_404(id)
     recipe.servings = request.form.get('servings')
     recipe.memo = request.form.get('memo')
 
-    # 食材の更新処理（必要に応じて前のリンク削除＋再追加）
+    # 食材の更新処理
     RecipeIngredient.query.filter_by(recipe_id=recipe.id).delete()
     ingredient_ids = request.form.getlist('ing_id')
     amounts = request.form.getlist('ing_amount')
