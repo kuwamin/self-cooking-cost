@@ -74,25 +74,27 @@
         <h3>材料:</h3>
         <table id="ingredients_table">
             <tr><th>食材名</th><th>使用量</th><th>単位</th><th></th></tr>
-            {% for ing_name, amount in data.ingredients %}
+            {% for ing in links %}
             <tr>
                 <td>
-                    <select name="ing_name" onchange="updateUnit(this)">
-                        {% for opt in ingredients %}
-                            <option value="{{ opt }}" {% if opt == ing_name %}selected{% endif %}>{{ opt }}</option>
+                    <select name="ing_id" onchange="updateUnit(this)">
+                        {% for ing_option in ingredients %}
+                            <option value="{{ ing_option.id }}" {% if ing_option.id == ing.ingredient_id %}selected{% endif %}>{{ ing_option.name }}</option>
                         {% endfor %}
                     </select>
                 </td>
-                <td><input type="number" step="0.01" name="ing_amount" value="{{ amount }}" required></td>
-                <td class="unit-label">{{ ingredients_db[ing_name].unit if ingredients_db[ing_name] is defined else '' }}</td>
+                <td><input type="number" step="0.01" name="ing_amount" value="{{ ing.amount }}" required></td>
+                <td class="unit-label">
+                    {{ ingredients_dict.get(ing.ingredient_id).unit if ingredients_dict.get(ing.ingredient_id) else '' }}
+                </td>
                 <td><button type="button" onclick="this.closest('tr').remove()">削除</button></td>
             </tr>
             {% endfor %}
         </table>
         <button type="button" onclick="addIngredientRow()">材料を追加</button><br><br>
-
         <button type="submit">更新</button>
     </form>
+
     <form method="POST" action="/delete_recipe" onsubmit="return confirm('本当に削除しますか？')">
         <input type="hidden" name="name" value="{{ name }}">
         <button type="submit" class="danger">この料理を削除</button>
@@ -101,10 +103,19 @@
 
     <script>
         const ingredientUnits = {
-            {% for name, info in ingredients_db.items() %}
-                "{{ name }}": "{{ info.unit }}",
+            {% for id, info in ingredients_dict.items() %}
+                "{{ id }}": "{{ info.unit }}",
             {% endfor %}
         };
+
+        const ingredientSelectHTML = `
+            <select name="ing_id" onchange="updateUnit(this)">
+                <option value="">選択してください</option>
+                {% for ing_option in ingredients %}
+                    <option value="{{ ing_option.id }}">{{ ing_option.name }}</option>
+                {% endfor %}
+            </select>
+        `;
 
         function updateUnit(selectEl) {
             const unit = ingredientUnits[selectEl.value] || "";
@@ -115,17 +126,8 @@
         function addIngredientRow() {
             const table = document.getElementById("ingredients_table");
             const row = table.insertRow();
-            const allOptions = `
-                {% for opt in ingredients %}
-                    <option value="{{ opt }}">{{ opt }}</option>
-                {% endfor %}
-            `;
             row.innerHTML = `
-                <td>
-                    <select name="ing_name" onchange="updateUnit(this)">
-                        ${allOptions}
-                    </select>
-                </td>
+                <td>${ingredientSelectHTML}</td>
                 <td><input type="number" step="0.01" name="ing_amount" required></td>
                 <td class="unit-label"></td>
                 <td><button type="button" onclick="this.closest('tr').remove()">削除</button></td>

@@ -23,6 +23,16 @@
     <!-- 食材登録フォーム -->
     <div class="form-section">
         <h2>食材を登録</h2>
+
+        <!-- フラッシュメッセージ表示 -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="alert alert-warning" role="alert">
+            この食材は料理に使用されています。削除できません。
+            </div>
+        {% endif %}
+        {% endwith %}
+
         <form action="/add_ingredient" method="POST" class="row g-2">
             <div class="col-md-3">
                 <label class="form-label">名前:</label>
@@ -51,16 +61,16 @@
     <div style="max-height: 200px; overflow-y: auto; border: 1px solid #ccc;">
         <table style="width: 100%;">
             <tr><th>名前</th><th>価格</th><th>数量</th><th>単位</th><th>操作</th></tr>
-            {% for name, info in ingredients %}
+            {% for ingredient in ingredients %}
             <tr>
-                <td>{{ name }}</td>
-                <td>{{ info['price'] | round }}円</td>
-                <td>{{ info['quantity'] | round }}</td>
-                <td>{{ info['unit'] }}</td>
+                <td>{{ ingredient.name }}</td>
+                <td>{{ ingredient.price | round }}円</td>
+                <td>{{ ingredient.quantity | round }}</td>
+                <td>{{ ingredient.unit }}</td>
                 <td>
-                    <a href="/edit_ingredient/{{ name }}">編集</a> |
+                    <a href="/edit_ingredient/{{ ingredient.id }}">編集</a> |
                     <form action="/delete_ingredient" method="POST" style="display:inline;">
-                        <input type="hidden" name="name" value="{{ name }}">
+                        <input type="hidden" name="id" value="{{ ingredient.id }}">
                         <button type="submit" onclick="return confirm('削除しますか？')">削除</button>
                     </form>
                 </td>
@@ -93,10 +103,10 @@
                     <tbody>
                         <tr>
                             <td>
-                                <select name="ing_name" class="form-select" required onchange="updateUnit(this)">
+                                <select name="ing_id" class="form-select" required onchange="updateUnit(this)">
                                     <option value="">選択してください</option>
-                                    {% for name, info in ingredients %}
-                                        <option value="{{ name }}">{{ name }}</option>
+                                    {% for ingredient in ingredients %}
+                                        <option value="{{ ingredient.id }}">{{ ingredient.name }}</option>
                                     {% endfor %}
                                 </select>
                             </td>
@@ -127,17 +137,17 @@
             <th>1食あたり</th>
             <th>操作</th>
         </tr>
-        {% for name, data in recipes %}
+        {% for recipe in recipes %}
         <tr>
             <td>
-                <a href="#" onclick="loadRecipeCost('{{ name }}'); return false;">
-                    {{ name }}
+                <a href="#" onclick="loadRecipeCost('{{ recipe.name }}'); return false;">
+                    {{ recipe.name }}
                 </a>
             </td>
-            <td>{{ recipe_costs[name].total }} 円</td>
-            <td>{{ recipe_costs[name].per_serving }} 円</td>
+            <td>{{ recipe_costs[recipe.id].total }} 円</td>
+            <td>{{ recipe_costs[recipe.id].per_serving }} 円</td>
             <td>
-                <a href="/edit_recipe/{{ name }}">編集</a>
+                <a href="/edit_recipe/{{ recipe.id }}">編集</a>
             </td>
         </tr>
         {% endfor %}
@@ -159,10 +169,10 @@
             const cell2 = row.insertCell(1);
             const cell3 = row.insertCell(2);
 
-            let selectHTML = '<select name="ing_name" class="form-select" required onchange="updateUnit(this)">';
+            let selectHTML = '<select name="ing_id" class="form-select" required onchange="updateUnit(this)">';
             selectHTML += '<option value="">選択してください</option>';
-            {% for name, info in ingredients %}
-                selectHTML += '<option value="{{ name }}">{{ name }}</option>';
+            {% for ingredient in ingredients %}
+                selectHTML += '<option value="{{ ingredient.id }}">{{ ingredient.name }}</option>';
             {% endfor %}
             selectHTML += '</select>';
             cell1.innerHTML = selectHTML;
@@ -172,10 +182,11 @@
         }
 
         const unitMap = {
-            {% for name, info in ingredients %}
-                "{{ name }}": "{{ info['unit'] }}",
+            {% for ingredient in ingredients %}
+                "{{ ingredient.id }}": "{{ ingredient.unit }}",
             {% endfor %}
         };
+
         function updateUnit(select) {
             const selected = select.value;
             const unit = unitMap[selected] || '';
