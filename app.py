@@ -264,8 +264,8 @@ def get_recipe_cost(recipe_name):
         details.append(f"{ing_name}: {amount}{info['unit']} × {unit_price:.2f}円 = {cost:.2f}円")
     per_serving = total_cost / servings if servings > 0 else 0
     return jsonify({
-        'total': round(total_cost, 2),
-        'per_serving': round(per_serving, 2),
+        'total': round(total_cost),
+        'per_serving': round(per_serving),
         'details': details
     })
 

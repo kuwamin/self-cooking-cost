@@ -30,11 +30,11 @@
             </div>
             <div class="col-md-3">
                 <label class="form-label">価格:</label>
-                <input type="number" step="0.01" name="price" class="form-control" required>
+                <input type="number" step="1" name="price" class="form-control" required>
             </div>
             <div class="col-md-3">
                 <label class="form-label">数量:</label>
-                <input type="number" step="0.01" name="quantity" class="form-control" required>
+                <input type="number" step="1" name="quantity" class="form-control" required>
             </div>
             <div class="col-md-2">
                 <label class="form-label">単位:</label>
@@ -54,8 +54,8 @@
             {% for name, info in ingredients %}
             <tr>
                 <td>{{ name }}</td>
-                <td>{{ info['price'] | round(0, 'floor') }}円</td>
-                <td>{{ info['quantity'] }}</td>
+                <td>{{ info['price'] | round }}円</td>
+                <td>{{ info['quantity'] | round }}</td>
                 <td>{{ info['unit'] }}</td>
                 <td>
                     <a href="/edit_ingredient/{{ name }}">編集</a> |
@@ -118,7 +118,6 @@
         </form>
     </div>
 
-
     <!-- 登録済み料理一覧 -->
     <h2>登録済み料理</h2>
     <table style="width: 100%; border-collapse: collapse;" border="1">
@@ -137,7 +136,6 @@
             </td>
             <td>{{ recipe_costs[name].total }} 円</td>
             <td>{{ recipe_costs[name].per_serving }} 円</td>
-            
             <td>
                 <a href="/edit_recipe/{{ name }}">編集</a>
             </td>
@@ -173,7 +171,6 @@
             cell3.innerHTML = '<button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">削除</button>';
         }
 
-
         const unitMap = {
             {% for name, info in ingredients %}
                 "{{ name }}": "{{ info['unit'] }}",
@@ -204,7 +201,7 @@
                             html += '<li>' + line + '</li>';
                         }
                         html += '</ul>';
-                        html += '<p><strong>合計: ' + data.total + '円 / 1食: ' + data.per_serving + '円</strong></p>';
+                        html += '<p><strong>合計: ' + Math.round(data.total) + '円 / 1食: ' + Math.round(data.per_serving) + '円</strong></p>';
                         document.getElementById('cost_display').innerHTML = html;
                     }
                 });
