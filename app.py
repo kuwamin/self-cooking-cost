@@ -175,8 +175,8 @@ def update_recipe(id):
         db.session.add(link)
 
     db.session.commit()
-    flash("更新しました")
-    return redirect(url_for('index'))
+    #flash("更新しました")
+    return redirect('/')
 
 
 
